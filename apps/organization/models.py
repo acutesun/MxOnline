@@ -19,6 +19,8 @@ class CityDict(models.Model):
 class CourseOrg(models.Model):
     city = models.ForeignKey(CityDict, verbose_name='所在城市')
     name = models.CharField(max_length=50, verbose_name='机构名称')
+    category = models.CharField(max_length=20, verbose_name='机构类别', default='pxjg',
+                                choices=(('pxjg', '培训机构'), ('personal', '个人'), ('school', '学校')))
     click_nums = models.IntegerField(default=0, verbose_name='点击数')
     fav_nums = models.IntegerField(default=0, verbose_name='收藏数')
     image = models.ImageField(upload_to='org/%Y/%m', verbose_name='封面图片', max_length=100)

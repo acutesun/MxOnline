@@ -1,11 +1,13 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.views.generic import View
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
+from django.contrib.auth.hashers import make_password
 
 from .models import UserProfile
-from .form import LoginForm
+from .form import LoginForm, RegisterForm
 
 
 # 4.自定义验证方法，修改邮箱用户名登录，默认只能用户名登录。
@@ -42,6 +44,29 @@ class LoginView(View):
 
         else:  # 验证输入格式不合法提示用户
             return render(request, 'login.html', {'login_form': login_form})
+
+
+class RegisterView(View):
+
+    def get(self, request):
+        register_form = RegisterForm()
+        return render(request, 'register.html', {'register_form': register_form})
+
+    def post(self, request):
+        register_form = RegisterForm(request.POST)  # 将上一次的错误信息传递过来
+        if register_form.is_valid():
+            email = request.POST.get('email', '')
+            password = request.POST.get('password', '')
+            user = UserProfile()
+            user.email = email
+            user.username = email
+            user.password = make_password(password)  # 对密码进行加密存入数据库
+            user.save()
+            return render(request, 'index.html')
+        else:
+            return render(request, 'register.html', {'register_form': register_form})
+
+
 
 
 
