@@ -13,15 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 import xadmin
 from django.views.generic import TemplateView
-from users.views import LoginView
+from users.views import LoginView, RegisterView
+from django.views.static import serve
+from .settings import MEDIA_ROOT
 
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
     url(r'login/$', LoginView.as_view(), name='login'),
-    url(r'register/$', LoginView.as_view(), name='register'),
+    url(r'register/$', RegisterView.as_view(), name='register'),
+    url(r'^captcha/', include('captcha.urls')),
+
+    # 机构列表处理url
+    url(r'^org/', include('organization.urls', namespace='org')),
+
+    #  配置上传文件的访问处理函数
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT})
 
 ]
