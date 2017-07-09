@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from random import sample
 from django.db import models
 
 from organization.models import CourseOrg, Teacher
@@ -18,6 +18,8 @@ class Course(models.Model):
     fav_nums = models.IntegerField(default=0, verbose_name='收藏人数')
     image = models.ImageField(upload_to='courses/%Y/%m', verbose_name='封面图片', max_length=100)
     click_nums = models.IntegerField(default=0, verbose_name='点击数')
+    category = models.CharField(default='back', choices=(('front', '前端'), ('database', '数据库'),
+                                       ('back', '后端')), verbose_name='课程类别', max_length=10)
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
 
     class Meta:
@@ -26,6 +28,15 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_lessons(self):
+        return self.lesson_set.all().count()  # 返回课程章节数
+
+    def get_user_course(self):  # 随机获取一个学习用户
+        users = self.usercourse_set.all()
+        if not users:
+            users = []
+        return users[:5]
 
 
 class Lesson(models.Model):
@@ -61,7 +72,7 @@ class CourseResource(models.Model):
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
 
     class Meta:
-        verbose_name = '视频'
+        verbose_name = '视频资源'
         verbose_name_plural = verbose_name
 
     def __str__(self):
