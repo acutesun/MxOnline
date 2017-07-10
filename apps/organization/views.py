@@ -3,6 +3,7 @@ from django.views import View
 from django.http import HttpResponse
 
 from organization.models import CityDict, CourseOrg
+from courses.models import Course
 from opreation.models import UserFavorite
 from .forms import UserAskForm
 from utils.commons import is_user_login
@@ -108,21 +109,23 @@ class AddFavView(View):
             # 判断用户登录
             return HttpResponse('{"status": "fail", "msg": "未登录"}', content_type='application/json')
 
-        # 查询是否已经收藏
+        # 查询是否已经收藏, 如果存在再次点击取消收藏
         records = UserFavorite.objects.filter(user=request.user, fav_id=fav_id, fav_type=fav_type)
-        if records:  # 如果存在再次点击取消收藏
+        if records:
             records.delete()
             return HttpResponse('{"status": "success", "msg": "收藏"}', content_type='application/json')
-        else:        # 不存在则收藏并保存到数据库
-            user_fav = UserFavorite()
-            if int(fav_id) > 0 and int(fav_type) > 0:
-                user_fav.fav_id = fav_id
-                user_fav.fav_type = fav_type
-                user_fav.user = request.user
-                user_fav.save()
-                return HttpResponse('{"status": "success", "msg": "已收藏"}', content_type='application/json')
-            else:
-                return HttpResponse('{"status": "fail", "msg": "收藏失败"}', content_type='application/json')
+
+        # 不存在则收藏并保存到数据库
+        user_fav = UserFavorite()
+        flag = False
+        if int(fav_id) > 0 and int(fav_type) > 0:
+            user_fav.fav_id = fav_id
+            user_fav.fav_type = fav_type
+            user_fav.user = request.user
+            user_fav.save()
+            flag = True
+        msg, status = ('已收藏', 'success') if flag else ('收藏失败', 'fail')
+        return HttpResponse('{"status": "%s", "msg": "%s"}' % (status, msg), content_type='application/json')
 
 
 def has_fav(request, org_id):

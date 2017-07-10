@@ -21,6 +21,8 @@ class Course(models.Model):
     category = models.CharField(default='back', choices=(('front', '前端'), ('database', '数据库'),
                                        ('back', '后端')), verbose_name='课程类别', max_length=10)
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
+    prompt= models.CharField(max_length=200, default='', verbose_name='课程须知')
+    learns = models.CharField(max_length=200, default='', verbose_name='你能学到什么')
 
     class Meta:
         verbose_name = '课程'
@@ -37,6 +39,10 @@ class Course(models.Model):
         if not users:
             users = []
         return users[:5]
+
+    def get_all_lesson(self):
+        ''' 获取所有的章节 '''
+        return self.lesson_set.all()
 
 
 class Lesson(models.Model):
@@ -55,6 +61,7 @@ class Lesson(models.Model):
 class Video(models.Model):
     lesson = models.ForeignKey(Lesson, verbose_name='章节')
     name = models.CharField(max_length=50, verbose_name='视频名')
+    url = models.CharField(default='', max_length=200, verbose_name='课程地址')
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
 
     class Meta:
@@ -67,7 +74,7 @@ class Video(models.Model):
 
 class CourseResource(models.Model):
     course = models.ForeignKey(Course, verbose_name='课程')
-    name = models.CharField(max_length=50, verbose_name='章节')
+    name = models.CharField(max_length=50, verbose_name='资源名称')
     download = models.FileField(upload_to='course/resource/%Y/%m', verbose_name='资源文件', max_length=100)
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
 
