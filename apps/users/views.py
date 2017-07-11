@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import make_password
 
 from .models import UserProfile
 from .form import LoginForm, RegisterForm
+from utils.mixin_util import LoginRequiredMixin
 
 
 # 4.自定义验证方法，修改邮箱用户名登录，默认只能用户名登录。
@@ -67,11 +68,9 @@ class RegisterView(View):
             return render(request, 'register.html', {'register_form': register_form})
 
 
-
-
-
-
-
+class UserInfoView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'usercenter-info.html')
 
 
 
