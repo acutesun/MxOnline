@@ -19,7 +19,7 @@ from django.views.generic import TemplateView
 from users.views import LoginView, RegisterView
 from django.views.static import serve
 from .settings import MEDIA_ROOT
-
+from organization.views import TeacherListView, TeacherDetailView
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
@@ -31,6 +31,12 @@ urlpatterns = [
     url(r'^org/', include('organization.urls', namespace='org')),
 
     #  配置上传文件的访问处理函数
-    url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT})
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT}),
 
+    # 公开课
+    url(r'course/', include('courses.urls', namespace='course')),
+
+    # 授课讲师
+    url(r'^teacher/list/$', TeacherListView.as_view(), name='teacher_list'),
+    url(r'^teacher/detail/(?P<teacher_id>\d+)$', TeacherDetailView.as_view(), name='teacher_detail'),
 ]

@@ -11,15 +11,21 @@ from utils.commons import is_user_login
 from opreation.models import UserFavorite, CourseComments, UserCourse
 from utils.mixin_util import LoginRequiredMixin
 
+
 class CourseListView(View):
     ''' 所有课程列表 '''
     def get(self, request):
         all_courses = Course.objects.all().order_by('-add_time')  # 默认按最新添加时间排序
+        # 排序
         sort = request.GET.get('sort', '')  # 获取get方法传递的sort参数
         if sort:
             all_courses = Course.objects.all().order_by('-' + sort)  # 按照传递的参数降序排序
         popular = Course.objects.all().order_by('-click_nums')[:3]   # 热门课程
-
+        # 检索
+        search_keywords = request.GET.get('keywords', '')
+        if search_keywords:   # 找出含有keywords的course对象
+            all_courses = Course.objects.filter(Q(name__icontains=search_keywords)|Q(desc__icontains=search_keywords))
+        # 分页
         try:
             page = request.GET.get('page', 1)
         except PageNotAnInteger:
