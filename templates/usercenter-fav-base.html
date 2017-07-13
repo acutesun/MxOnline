@@ -1,0 +1,162 @@
+{% extends 'user_base.html' %}
+{% block title %}
+<title>我的收藏 - 慕学在线网</title>
+{% endblock title %}
+{% block bread %}
+    <section>
+        <div class="wp">
+            <ul  class="crumbs">
+                <li><a href="{% url 'index' %}">首页</a>></li>
+                <li><a href="{% url 'user:info' %}">个人中心</a>></li>
+                <li>我的收藏</li>
+            </ul>
+        </div>
+    </section>
+{% endblock %}
+{% block right_content %}
+    <div class="right">
+        <div class="personal_des Releasecont">
+            <div class="head">
+                <h1>我的收藏</h1>
+            </div>
+
+        </div>
+        <div class="personal_des permessage">
+
+            <div class="head">
+                <ul class="tab_header messagehead">
+                    <li {% if request.path == '/user/fav/org/' %} class="active"{% endif %}><a href="{% url 'user:fav_org' %}">课程机构</a></li>
+                    <li {% if request.path == '/user/fav/teacher/' %} class="active"{% endif %}><a href="{% url 'user:fav_teacher' %}">授课教师 </a></li>
+                    <li {% if request.path == '/user/fav/course/' %} class="active"{% endif %}><a href="{% url 'user:fav_course' %}">公开课程</a></li>
+                </ul>
+            </div>
+            {% block messagelist %}
+
+            {% endblock messagelist %}
+        </div>
+    </div>
+{% endblock right_content %}
+
+<script type="text/javascript">
+    $('.jsDeleteFav_course').on('click', function () {
+        var _this = $(this),
+            favid = _this.attr('data-favid');
+        alert(favid)
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "/org/add_fav/",
+            data: {
+                fav_type: 1,
+                fav_id: favid,
+                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+            },
+            async: true,
+            success: function (data) {
+                Dml.fun.winReload();
+            }
+        });
+    });
+
+    $('.jsDeleteFav_teacher').on('click', function () {
+        var _this = $(this),
+            favid = _this.attr('data-favid');
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "/org/add_fav/",
+            data: {
+                fav_type: 3,
+                fav_id: favid,
+                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+            },
+            async: true,
+            success: function (data) {
+                Dml.fun.winReload();
+            }
+        });
+    });
+
+
+    $('.jsDeleteFav_org').on('click', function () {
+        var _this = $(this),
+            favid = _this.attr('data-favid');
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "/org/add_fav/",
+            data: {
+                fav_type: 2,
+                fav_id: favid,
+                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+            },
+            async: true,
+            success: function (data) {
+                Dml.fun.winReload();
+            }
+        });
+    });
+</script>
+
+
+<script>
+    var shareUrl = '',
+        shareText = '',
+        shareDesc = '',
+        shareComment = '';
+    $(function () {
+        $(".bdsharebuttonbox a").mouseover(function () {
+            var type = $(this).attr('data-cmd'),
+                $parent = $(this).parent('.bdsharebuttonbox'),
+                fxurl = $parent.attr('data-url'),
+                fxtext = $parent.attr('data-text'),
+                fxdesc = $parent.attr('data-desc'),
+                fxcomment = $parent.attr('data-comment');
+            switch (type) {
+                case 'tsina':
+                case 'tqq':
+                case 'renren':
+                    shareUrl = fxurl;
+                    shareText = fxdesc;
+                    shareDesc = '';
+                    shareComment = '';
+                    break;
+                default :
+                    shareUrl = fxurl;
+                    shareText = fxtext;
+                    shareDesc = fxdesc;
+                    shareComment = fxcomment;
+                    break;
+            }
+        });
+    });
+    function SetShareUrl(cmd, config) {
+        if (shareUrl) {
+            config.bdUrl = "" + shareUrl;
+        }
+        if (shareText) {
+            config.bdText = shareText;
+        }
+        if (shareDesc) {
+            config.bdDesc = shareDesc;
+        }
+        if (shareComment) {
+            config.bdComment = shareComment;
+        }
+
+        return config;
+    }
+    window._bd_share_config = {
+        "common": {
+            "onBeforeClick": SetShareUrl,
+            "bdPic": "",
+            "bdMini": "2",
+            "searchPic": "1",
+            "bdMiniList": false
+        },
+        "share": {
+            "bdSize": "16"
+        }
+    };
+    with (document)0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];
+</script>

@@ -27,37 +27,41 @@
 					<div class="fl"><p>服务电话：<b>33333333</b></p></div>
 					<!--登录后跳转-->
 
-
-                        <div class="personal">
-                            <dl class="user fr">
-                                <dd>bobby<img class="down fr" src="{% static 'images/top_down.png' %}"/></dd>
-                                <dt><img width="20" height="20" src="../media/image/2016/12/default_big_14.png"/></dt>
+                         {% if request.user.is_authenticated %}
+                    <div class="personal">
+                        <dl class="user fr">
+                            <dd>{{ request.user.nick_name }}<img class="down fr" src="{% static 'images/top_down.png' %}"/></dd>
+                            <dt><img width="20" height="20" src="{{ MEDIA_URL }}{{ request.user.image }}"/></dt>
+                        </dl>
+                        <div class="userdetail">
+                            <dl>
+                                <dt><img width="80" height="80" src="{{ MEDIA_URL }}{{ request.user.image }}"/></dt>
+                                <dd>
+                                    <h2>django</h2>
+                                    <p>bobby</p>
+                                </dd>
                             </dl>
-                            <div class="userdetail">
-                            	<dl>
-	                                <dt><img width="80" height="80" src="../media/image/2016/12/default_big_14.png"/></dt>
-	                                <dd>
-	                                    <h2>django</h2>
-	                                    <p>bobby</p>
-	                                </dd>
-                                </dl>
-                                <div class="btn">
-	                                <a class="personcenter fl" href="usercenter-info.html">进入个人中心</a>
-	                                <a class="fr" href="/logout/">退出</a>
-                                </div>
+                            <div class="btn">
+                                <a class="personcenter fl" href="{% url 'user:info' %}">进入个人中心</a>
+                                <a class="fr" href="/logout/">退出</a>
                             </div>
                         </div>
-                        <a href="usercenter-message.html">
+                    </div>
+                    {% else %}
+                        <a style="color:white" class="fr registerbtn" href="{% url 'register' %}">注册</a>
+                        <a style="color:white" class="fr loginbtn" href="{% url 'login' %}">登录</a>
+                    {% endif %}
+
+                    <a href="usercenter-message.html">
                             <div class="msg-num"><span id="MsgNum">0</span></div>
                         </a>
-
 
 				</div>
 			</div>
 
     <div class="middle">
         <div class="wp">
-            <a href="index.html"><img class="fl" src="{% static 'images/logo2.png' %}"/></a>
+            <a href="{% url 'index' %}"><img class="fl" src="{% static 'images/logo2.png' %}"/></a>
             <h1>我的慕学网</h1>
         </div>
     </div>
@@ -75,11 +79,11 @@
 	<div class="wp list personal_list">
 	<div class="left">
         <ul>
-            <li class="active2"><a href="usercenter-info.html">个人资料</a></li>
-            <li ><a href="usercenter-mycourse.html">我的课程</a></li>
-            <li ><a href="usercenter-fav-course.html">我的收藏</a></li>
-            <li >
-                <a href="usercenter-message.html" style="position: relative;">
+            <li {% ifequal request.path '/user/info/' %}class="active2"{% endifequal %}><a href="{% url 'user:info' %}">个人资料</a></li>
+            <li {% if request.path == '/user/course/' %}class="active2"{% endif %}><a href="{% url 'user:course' %}">我的课程</a></li>
+            <li {% if '/user/fav/' in request.path %}class="active2"{% endif %}><a href="{% url 'user:fav_org' %}">我的收藏</a></li>
+            <li {% if request.path == '/user/message/' %}class="active2"{% endif %}>
+                <a href="{% url 'user:message' %}" style="position: relative;">
                     我的消息
                 </a>
             </li>
@@ -87,64 +91,7 @@
 	</div>
 
     {% block right_content %}
-    <div class="right">
-		<div class="personal_des ">
-			<div class="head" style="border:1px solid #eaeaea;">
-				<h1>个人信息</h1>
-			</div>
-			<div class="inforcon">
-				<div class="left" style="width:242px;">
-                    <iframe id='frameFile' name='frameFile' style='display: none;'></iframe>
-                    <form class="clearfix" id="jsAvatarForm" enctype="multipart/form-data" autocomplete="off" method="post" action="/users/image/upload/" target='frameFile'>
-                        <label class="changearea" for="avatarUp">
-                            <span id="avatardiv" class="pic">
-                                <img width="100" height="100" class="js-img-show" id="avatarShow" src="../media/image/2016/12/default_big_14.png"/>
-                            </span>
-                            <span class="fl upload-inp-box" style="margin-left:70px;">
-                                <span class="button btn-green btn-w100" id="jsAvatarBtn">修改头像</span>
-                                <input type="file" name="image" id="avatarUp" class="js-img-up"/>
-                            </span>
-                        </label>
-                        <input type='hidden' name='csrfmiddlewaretoken' value='799Y6iPeEDNSGvrTu3noBrO4MBLv6enY' />
-                    </form>
-                    <div style="border-top:1px solid #eaeaea;margin-top:30px;">
-                        <a class="button btn-green btn-w100" id="jsUserResetPwd" style="margin:80px auto;width:100px;">修改密码</a>
-                    </div>
-				</div>
-				<form class="perinform" id="jsEditUserForm" autocomplete="off">
-					<ul class="right">
-						<li>昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称：
-                           <input type="text" name="nick_name" id="nick_name" value="django" maxlength="10">
-                            <i class="error-tips"></i>
-                        </li>
-						<li>生&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日：
-                           <input type="text" id="birth_day" name="birday" value="2009年9月2日" readonly="readonly"/>
-                            <i class="error-tips"></i>
-						</li>
-						<li>性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别：
-							<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio"  name="gender" value="male" >男</label>
-							<label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="gender" value="female" checked="checked">女</label>
-						</li>
-						<li class="p_infor_city">地&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;址：
-                            <input type="text" name="address" id="address" placeholder="请输入你的地址" value="我来自火星" maxlength="10">
-						    <i class="error-tips"></i>
-                        </li>
-						<li>手&nbsp;&nbsp;机&nbsp;&nbsp;号：
-                            <input type="text" name="mobile" id="mobile" placeholder="请输入你的手机号码" value="" maxlength="10">
-                        </li>
-                        <li>邮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;箱：
-                        	<input class="borderno" type="text" name="email" readonly="readonly" value="projectsedu@sina.com"/>
-                            <span class="green changeemai_btn">[修改]</span>
-                    	</li>
-						<li class="button heibtn">
-							<input type="button" id="jsEditUserBtn" value="保存">
-						</li>
-					</ul>
-                    <input type='hidden' name='csrfmiddlewaretoken' value='799Y6iPeEDNSGvrTu3noBrO4MBLv6enY' />
-				</form>
-			</div>
-		</div>
-	</div>
+
     {% endblock %}
 
 	</div>

@@ -166,12 +166,12 @@
                     
                         <dl>
                             <dt>
-                                <a target="_blank" href="">
-                                    <img width="240" height="220" class="scrollLoading" src="/static/media/courses/2016/11/540e57300001d6d906000338-240-135_mvvGYHL.jpg"/>
+                                <a target="_blank" href="{% url 'course:course_detail' recommend.id %}">
+                                    <img width="240" height="220" class="scrollLoading" src="{{ MEDIA_URL }}{{ recommend.image }}"/>
                                 </a>
                             </dt>
                             <dd>
-                                <a target="_blank" href=""><h2> {{ recommend.name }}</h2></a>
+                                <a target="_blank" href="{% url 'course:course_detail' recommend.id %}"><h2> {{ recommend.name }}</h2></a>
                                 <span class="fl">学习时长：<i class="key">{{ recommend.learn_times }}</i></span>
                             </dd>
                         </dl>

@@ -5,10 +5,15 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
+import json
 
 from .models import UserProfile
-from .form import LoginForm, RegisterForm
+from opreation.models import UserCourse
+from .form import LoginForm, RegisterForm, UserHeadImageForm, ModifyPwdForm
 from utils.mixin_util import LoginRequiredMixin
+from courses.models import Course
+from opreation.models import UserFavorite
+from organization.models import CourseOrg, Teacher
 
 
 # 4.自定义验证方法，修改邮箱用户名登录，默认只能用户名登录。
@@ -27,6 +32,8 @@ class LoginView(View):
         return render(request, 'login.html')
 
     def post(self, request):
+        if request.user.is_authenticated():
+            return render(request, 'usercenter-info.html')
         # 5.后台验证前端用户密码的输入格式
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
@@ -69,11 +76,88 @@ class RegisterView(View):
 
 
 class UserInfoView(LoginRequiredMixin, View):
+    ''' 用户中心 '''
     def get(self, request):
         return render(request, 'usercenter-info.html')
 
 
+class UserCourseView(LoginRequiredMixin, View):
+    ''' 用户所有课程 '''
+    def get(self, request):
+        user_courses = UserCourse.objects.filter(user=request.user)
+        course_ids = [user_course.course.id for user_course in user_courses]
+        courses = Course.objects.filter(id__in=course_ids)
+        context = {
+            'courses': courses,
+        }
+        return render(request, 'usercenter-mycourse.html', context)
 
 
+class UserFavOrgView(LoginRequiredMixin, View):
+    ''' 用户收藏机构 '''
+    def get(self, request):
+        user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=2)
+        org_ids = [user_fav.fav_id for user_fav in user_favs]  # 课程机构的id
+        orgs = CourseOrg.objects.filter(id__in=org_ids)
+        context = {
+            'orgs': orgs,
+        }
+        return render(request, 'usercenter-fav-org.html', context)
 
 
+class UserFavTeacherView(LoginRequiredMixin, View):
+    ''' 用户收藏讲师 '''
+    def get(self, request):
+        user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=3)
+        teacher_ids = [user_fav.fav_id for user_fav in user_favs]  # 收藏讲师的id
+        teachers = Teacher.objects.filter(id__in=teacher_ids)
+        context = {
+            'teachers': teachers,
+        }
+        return render(request, 'usercenter-fav-teacher.html', context)
+
+
+class UserFavCourseView(LoginRequiredMixin, View):
+    ''' 用户收藏课程 '''
+    def get(self, request):
+        user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=1)
+        courses_ids = [user_fav.fav_id for user_fav in user_favs]  # 收藏讲师的id
+        courses = Course.objects.filter(id__in=courses_ids)
+        context = {
+            'courses': courses,
+        }
+        return render(request, 'usercenter-fav-course.html', context)
+
+
+class UserMsgView(LoginRequiredMixin, View):
+    ''' 用户消息 '''
+    def get(self, request):
+        return render(request, 'usercenter-message.html')
+
+
+class UserHeadImageView(LoginRequiredMixin, View):
+    ''' 修改用户头像 '''
+    def post(self, request):
+        image_form = UserHeadImageForm(request.POST, request.FILES, instance=request.user)  # 将实例对象传入
+        if image_form.is_valid():
+            # image = image_form.cleaned_data['image']  # 通过验证的图片会放在clean_data这个字典中去
+            # request.user.image = image
+            request.user.save()
+            return HttpResponse('{"status": "success"}', content_type='application/json')
+        return HttpResponse('{"status": "fail"}', content_type='application/json')
+
+
+class UserAlterPwdView(LoginRequiredMixin, View):
+    ''' 修改用户密码 '''
+    def post(self, request):
+        form = ModifyPwdForm(request.POST)
+        if form.is_valid():
+            password1 = request.POST.get('password1', '')
+            password2 = request.POST.get('password2', '')
+            if password1 != password2:
+                return HttpResponse('{"status": "fail", "msg":"密码不一致"}', content_type='application/json')
+            request.user.password = make_password(password2)
+            request.user.save()
+            return HttpResponse('{"status": "success", "msg":"修改成功"}', content_type='application/json')
+        else:
+            return HttpResponse(json.dumps(form.errors), content_type='application/json')
