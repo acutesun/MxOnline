@@ -32,33 +32,23 @@
                     <li class="active"><a href="{% url 'user:message' %}">个人消息</a></li>
                 </ul>
 
-
             </div>
+            {% for message in messages %}
             <div class="messagelist">
 
                 <div class="messages">
                     <div class="fr">
-                        <div class="top"><span class="fl time">{{ request.user.add_time }}</span><span
+                        <div class="top"><span class="fl time">{{ message.add_time }}</span><span
                                 class="fr btn foldbtn"></span></div>
                         <p>
-                            欢迎注册
+                            {{ message.message }}
                         </p>
                     </div>
                 </div>
 
 
             </div>
-
-
-            <div class="pageturn pagerright">
-                <ul class="pagelist">
-
-
-                    <li class="active"><a href="?page=1">1</a></li>
-
-
-                </ul>
-            </div>
+            {% endfor %}
         </div>
 
     </div>

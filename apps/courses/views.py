@@ -97,12 +97,18 @@ class CourseCommentView(View):
     ''' 课程评论页面 '''
     def get(self, request, course_id):
         course = Course.objects.get(id=course_id)
-        resource = CourseResource.objects.get(course=course)  # 下载资源
+        resource = CourseResource.objects.filter(course=course)  # 下载资源
         user_comments = CourseComments.objects.all()
+
+        user_courses = UserCourse.objects.filter(user=request.user)
+        ids = [user_course.course.id for user_course in user_courses]  # 得到当前用户学习过的所有课程id
+        learn_courses = Course.objects.filter(id__in=ids)[:2]  # 得到所有学习的课程
+
         context = {
             'course': course,
             'resource': resource,
             'user_comments': user_comments,
+            'learn_courses': learn_courses,
         }
         return render(request, 'course-comment.html', context)
 

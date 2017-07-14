@@ -43,7 +43,7 @@
                             </dl>
                             <div class="btn">
                                 <a class="personcenter fl" href="{% url 'user:info' %}">进入个人中心</a>
-                                <a class="fr" href="/logout/">退出</a>
+                                <a class="fr" href="{% url 'logout' %}">退出</a>
                             </div>
                         </div>
                     </div>
@@ -52,8 +52,8 @@
                         <a style="color:white" class="fr loginbtn" href="{% url 'login' %}">登录</a>
                     {% endif %}
 
-                    <a href="usercenter-message.html">
-                            <div class="msg-num"><span id="MsgNum">0</span></div>
+                    <a href="{% url 'user:message' %}">
+                            <div class="msg-num"><span id="MsgNum">{{ request.user.get_unread_msg }}</span></div>
                         </a>
 
 				</div>

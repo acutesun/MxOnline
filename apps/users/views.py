@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic import View
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
@@ -12,7 +12,7 @@ from opreation.models import UserCourse
 from .form import LoginForm, RegisterForm, UserHeadImageForm, ModifyPwdForm
 from utils.mixin_util import LoginRequiredMixin
 from courses.models import Course
-from opreation.models import UserFavorite
+from opreation.models import UserFavorite, UserMessage
 from organization.models import CourseOrg, Teacher
 
 
@@ -20,11 +20,17 @@ from organization.models import CourseOrg, Teacher
 class CustomBackend(ModelBackend):
     def authenticate(self, username=None, password=None, **kwargs):
         try:
-            user = UserProfile.objects.get(Q(username=username)|Q(email=username))
+            user = UserProfile.objects.get(Q(username=username) | Q(email=username))
             if user.check_password(password):
                 return user
         except Exception as e:
             return None
+
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('index')
 
 
 class LoginView(View):
@@ -47,7 +53,7 @@ class LoginView(View):
                 login(request, user)
                 return render(request, 'index.html')
 
-            else:   # 验证失败还是回到登录界面
+            else:  # 验证失败还是回到登录界面
                 return render(request, 'login.html', {'msg': '用户名或密码错误！'})
 
         else:  # 验证输入格式不合法提示用户
@@ -55,7 +61,6 @@ class LoginView(View):
 
 
 class RegisterView(View):
-
     def get(self, request):
         register_form = RegisterForm()
         return render(request, 'register.html', {'register_form': register_form})
@@ -77,12 +82,14 @@ class RegisterView(View):
 
 class UserInfoView(LoginRequiredMixin, View):
     ''' 用户中心 '''
+
     def get(self, request):
         return render(request, 'usercenter-info.html')
 
 
 class UserCourseView(LoginRequiredMixin, View):
     ''' 用户所有课程 '''
+
     def get(self, request):
         user_courses = UserCourse.objects.filter(user=request.user)
         course_ids = [user_course.course.id for user_course in user_courses]
@@ -95,6 +102,7 @@ class UserCourseView(LoginRequiredMixin, View):
 
 class UserFavOrgView(LoginRequiredMixin, View):
     ''' 用户收藏机构 '''
+
     def get(self, request):
         user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=2)
         org_ids = [user_fav.fav_id for user_fav in user_favs]  # 课程机构的id
@@ -107,6 +115,7 @@ class UserFavOrgView(LoginRequiredMixin, View):
 
 class UserFavTeacherView(LoginRequiredMixin, View):
     ''' 用户收藏讲师 '''
+
     def get(self, request):
         user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=3)
         teacher_ids = [user_fav.fav_id for user_fav in user_favs]  # 收藏讲师的id
@@ -119,6 +128,7 @@ class UserFavTeacherView(LoginRequiredMixin, View):
 
 class UserFavCourseView(LoginRequiredMixin, View):
     ''' 用户收藏课程 '''
+
     def get(self, request):
         user_favs = UserFavorite.objects.filter(user=request.user).filter(fav_type=1)
         courses_ids = [user_fav.fav_id for user_fav in user_favs]  # 收藏讲师的id
@@ -131,12 +141,22 @@ class UserFavCourseView(LoginRequiredMixin, View):
 
 class UserMsgView(LoginRequiredMixin, View):
     ''' 用户消息 '''
+
     def get(self, request):
-        return render(request, 'usercenter-message.html')
+        messages = UserMessage.objects.filter(user=request.user)
+        unread_messages = UserMessage.objects.filter(user=request.user, has_read=False)
+        for message in unread_messages:   # 设置为已阅读
+            message.has_read = True
+            message.save()
+        context = {
+            'messages': messages,
+        }
+        return render(request, 'usercenter-message.html', context)
 
 
 class UserHeadImageView(LoginRequiredMixin, View):
     ''' 修改用户头像 '''
+
     def post(self, request):
         image_form = UserHeadImageForm(request.POST, request.FILES, instance=request.user)  # 将实例对象传入
         if image_form.is_valid():
@@ -149,6 +169,7 @@ class UserHeadImageView(LoginRequiredMixin, View):
 
 class UserAlterPwdView(LoginRequiredMixin, View):
     ''' 修改用户密码 '''
+
     def post(self, request):
         form = ModifyPwdForm(request.POST)
         if form.is_valid():

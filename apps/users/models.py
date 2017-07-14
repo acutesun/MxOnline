@@ -20,6 +20,10 @@ class UserProfile(AbstractUser):
     def __str__(self):
         return self.username
 
+    def get_unread_msg(self):
+        ''' 获取未读消息数量 '''
+        return self.usermessage_set.filter(has_read=False).count()
+
 
 class EmailVerifyRecord(models.Model):
     code = models.CharField(max_length=20, verbose_name='验证码')

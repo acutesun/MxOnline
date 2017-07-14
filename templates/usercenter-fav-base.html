@@ -37,6 +37,7 @@
     </div>
 {% endblock right_content %}
 
+{% block custom_js %}
 <script type="text/javascript">
     $('.jsDeleteFav_course').on('click', function () {
         var _this = $(this),
@@ -49,7 +50,7 @@
             data: {
                 fav_type: 1,
                 fav_id: favid,
-                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+                csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             async: true,
             success: function (data) {
@@ -68,7 +69,7 @@
             data: {
                 fav_type: 3,
                 fav_id: favid,
-                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+                csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             async: true,
             success: function (data) {
@@ -88,7 +89,7 @@
             data: {
                 fav_type: 2,
                 fav_id: favid,
-                csrfmiddlewaretoken: '799Y6iPeEDNSGvrTu3noBrO4MBLv6enY'
+                csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             async: true,
             success: function (data) {
@@ -160,3 +161,4 @@
     };
     with (document)0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];
 </script>
+{% endblock custom_js %}
