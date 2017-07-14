@@ -182,3 +182,15 @@ class UserAlterPwdView(LoginRequiredMixin, View):
             return HttpResponse('{"status": "success", "msg":"修改成功"}', content_type='application/json')
         else:
             return HttpResponse(json.dumps(form.errors), content_type='application/json')
+
+
+def page_not_found(request):
+    response = render(request, '404.html')
+    response.status_code = 404
+    return response
+
+
+def page_errors(request):
+    response = render(request, '500.html')
+    response.status_code = 500
+    return response

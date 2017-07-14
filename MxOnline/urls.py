@@ -18,7 +18,7 @@ import xadmin
 from django.views.generic import TemplateView
 from users.views import LoginView, RegisterView, LogoutView
 from django.views.static import serve
-from .settings import MEDIA_ROOT
+from .settings import MEDIA_ROOT, STATIC_ROOT
 from organization.views import TeacherListView, TeacherDetailView
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
@@ -42,5 +42,8 @@ urlpatterns = [
     url(r'^teacher/detail/(?P<teacher_id>\d+)$', TeacherDetailView.as_view(), name='teacher_detail'),
 
     # 个人中心
-    url(r'^user/', include('users.urls', namespace='user'))
+    url(r'^user/', include('users.urls', namespace='user')),
+
+    # settings中DEBUG设置为False， 静态文件路径失效。需要自己配置路径
+    url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
 ]
