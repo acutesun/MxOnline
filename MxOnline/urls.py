@@ -15,14 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 import xadmin
-from django.views.generic import TemplateView
-from users.views import LoginView, RegisterView, LogoutView
+from users.views import LoginView, RegisterView, LogoutView, IndexView
 from django.views.static import serve
-from .settings import MEDIA_ROOT, STATIC_ROOT
+from .settings import MEDIA_ROOT
 from organization.views import TeacherListView, TeacherDetailView
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
+    url(r'^$', IndexView.as_view(), name='index'),
     url(r'logout/$', LogoutView.as_view(), name='logout'),
     url(r'login/$', LoginView.as_view(), name='login'),
     url(r'register/$', RegisterView.as_view(), name='register'),
@@ -45,5 +44,5 @@ urlpatterns = [
     url(r'^user/', include('users.urls', namespace='user')),
 
     # settings中DEBUG设置为False， 静态文件路径失效。需要自己配置路径
-    url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
+    # url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
 ]

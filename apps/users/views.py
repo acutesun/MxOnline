@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 import json
+from django.core.urlresolvers import reverse
 
-from .models import UserProfile
+from .models import UserProfile, Banner
 from opreation.models import UserCourse
 from .form import LoginForm, RegisterForm, UserHeadImageForm, ModifyPwdForm
 from utils.mixin_util import LoginRequiredMixin
@@ -51,7 +52,7 @@ class LoginView(View):
             # 3. 验证成功跳转到主页或者个人中心
             if user is not None:
                 login(request, user)
-                return render(request, 'index.html')
+                return HttpResponseRedirect(reverse('index'))
 
             else:  # 验证失败还是回到登录界面
                 return render(request, 'login.html', {'msg': '用户名或密码错误！'})
@@ -69,13 +70,16 @@ class RegisterView(View):
         register_form = RegisterForm(request.POST)  # 将上一次的错误信息传递过来
         if register_form.is_valid():
             email = request.POST.get('email', '')
+            if UserProfile.objects.filter(email=email):
+                return render(request, 'register.html', {'register_form': '账户已存在'})
             password = request.POST.get('password', '')
             user = UserProfile()
             user.email = email
             user.username = email
             user.password = make_password(password)  # 对密码进行加密存入数据库
             user.save()
-            return render(request, 'index.html')
+            request.user = user
+            return redirect('index')
         else:
             return render(request, 'register.html', {'register_form': register_form})
 
@@ -182,6 +186,22 @@ class UserAlterPwdView(LoginRequiredMixin, View):
             return HttpResponse('{"status": "success", "msg":"修改成功"}', content_type='application/json')
         else:
             return HttpResponse(json.dumps(form.errors), content_type='application/json')
+
+
+class IndexView(View):
+    ''' 主页面 '''
+    def get(self, request):
+        banners = Banner.objects.order_by('-add_time')[:5]
+        banner_courses = Course.objects.order_by('-add_time')[:3]
+        courses = Course.objects.all()[:6]
+        orgs = CourseOrg.objects.all()[:10]
+        context = {
+            'banners': banners,
+            'banner_courses': banner_courses,
+            'courses': courses,
+            'orgs': orgs,
+        }
+        return render(request, 'index.html', context)
 
 
 def page_not_found(request):

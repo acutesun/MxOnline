@@ -147,7 +147,7 @@
                                         <ul class="other-list">
                                             {% for course in learn_courses %}
                                                 <li class="curr">
-                                                    <a href="course-detail.html" target="_blank">
+                                                    <a href="{% url 'course:course_detail' course.id %}" target="_blank">
                                                         <img src="{{ MEDIA_URL }}{{ course.image }}"
                                                              alt="{{ course.name }}">
                                                         <span class="name autowrap">{{ course.name }}</span>
